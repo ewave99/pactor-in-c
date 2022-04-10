@@ -7,13 +7,16 @@
 struct Stack
 {
     struct Stack * last;
+    struct Stack * next;
     int value;
 };
 
 
 struct Context
 {
+    struct Stack * bottom;
     struct Stack * top;
+    int stack_length;
 };
 
 void runRepl();
@@ -27,6 +30,8 @@ int toInteger(char * token);
 void push(struct Context * context, int value);
 int pop(struct Context * context);
 
+void printStack(struct Context * context);
+
 int main()
 {
     runRepl();
@@ -38,7 +43,13 @@ void runRepl()
 {
     char buffer[BUFFER_SIZE];
     struct Context * context;
+
     context = (struct Context *) malloc(sizeof(struct Context));
+
+    context->top = NULL;
+    context->bottom = NULL;
+    context->stack_length = 0;
+
     while (1)
     {
         getInput(buffer);
@@ -85,15 +96,61 @@ void processToken(char * token, struct Context * context)
 {
     int int_value;
 
-    if (isInteger(token))
+    if (strcmp(token, ".") == 0)
+    {
+        if (context->top != NULL)
+        {
+            int_value = pop(context);
+            printf("%d\n", int_value);
+        }
+        else
+        {
+            printf("Stack empty, cannot pop.\n");
+        }
+    }
+    else if (strcmp(token, ".s") == 0)
+    {
+        printStack(context);
+    }
+    else if (strcmp(token, "+") == 0)
+    {
+        int b = pop(context);
+        int a = pop(context);
+        int result = a + b;
+        push(context, result);
+    }
+    else if (strcmp(token, "-") == 0)
+    {
+        int b = pop(context);
+        int a = pop(context);
+        int result = a - b;
+        push(context, result);
+    }
+    else if (strcmp(token, "*") == 0)
+    {
+        int b = pop(context);
+        int a = pop(context);
+        int result = a * b;
+        push(context, result);
+    }
+    else if (strcmp(token, "/") == 0)
+    {
+        int b = pop(context);
+        int a = pop(context);
+        if (b != 0)
+        {
+            int result = a / b;
+            push(context, result);
+        }
+        else
+        {
+            printf("Cannot divide by zero.\n");
+        }
+    }
+    else if (isInteger(token))
     {
         int_value = toInteger(token);
         push(context, int_value);
-    }
-    else if (strcmp(token, "pop") == 0)
-    {
-        int_value = pop(context);
-        printf("%d\n", int_value);
     }
 }
 
@@ -138,9 +195,70 @@ int toInteger(char * token)
 
 void push(struct Context * context, int value)
 {
+    struct Stack * new_node;
+
+    new_node = (struct Stack *) malloc(sizeof(struct Stack));
+
+    new_node->last = context->top;
+    new_node->next = NULL;
+    new_node->value = value;
+
+    if (context->stack_length > 0)
+        context->top->next = new_node;
+
+    if (context->stack_length == 0)
+        context->bottom = new_node;
+    else if (context->stack_length == 1)
+        context->bottom->next = new_node;
+
+    context->top = new_node;
+
+    context->stack_length ++;
 }
 
 int pop(struct Context * context)
 {
-    return 0;
+    if (context->stack_length == 0)
+        return -1;
+
+    struct Stack * old_top;
+    struct Stack * new_top;
+    int value;
+
+    old_top = context->top;
+
+    new_top = old_top->last;
+    value = old_top->value;
+
+    if (context->stack_length > 1)
+        new_top->next = NULL;
+
+    context->top = new_top;
+
+    if (context->stack_length == 1)
+        context->bottom = NULL;
+    else if (context->stack_length == 2)
+        context->bottom->next = NULL;
+
+    free(old_top);
+
+    context->stack_length --;
+
+    return value;
+}
+
+void printStack(struct Context * context)
+{
+    struct Stack * node;
+    int index;
+
+    node = context->bottom;
+    index = 0;
+    while (index < context->stack_length && node != NULL)
+    {
+        printf("%d ", node->value);
+        node = node->next;
+        index ++;
+    }
+    printf("<- TOP\n");
 }
