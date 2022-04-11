@@ -95,6 +95,10 @@ void processInput(char * buffer, struct Context * context)
 void processToken(char * token, struct Context * context)
 {
     int int_value;
+    int a;
+    int b;
+    int c;
+    int result;
 
     if (strcmp(token, ".") == 0)
     {
@@ -112,34 +116,60 @@ void processToken(char * token, struct Context * context)
     {
         printStack(context);
     }
+    else if (strcmp(token, "dup") == 0)
+    {
+        a = pop(context);
+        push(context, a);
+        push(context, a);
+    }
+    else if (strcmp(token, "swap") == 0)
+    {
+        b = pop(context);
+        a = pop(context);
+        push(context, b);
+        push(context, a);
+    }
+    else if (strcmp(token, "drop") == 0)
+    {
+        pop(context);
+    }
+    else if (strcmp(token, "rot") == 0)
+    {
+        c = pop(context);
+        b = pop(context);
+        a = pop(context);
+        push(context, b);
+        push(context, c);
+        push(context, a);
+    }
     else if (strcmp(token, "+") == 0)
     {
-        int b = pop(context);
-        int a = pop(context);
-        int result = a + b;
+        b = pop(context);
+        a = pop(context);
+        result = a + b;
         push(context, result);
     }
     else if (strcmp(token, "-") == 0)
     {
-        int b = pop(context);
-        int a = pop(context);
-        int result = a - b;
+        b = pop(context);
+        a = pop(context);
+        result = a - b;
         push(context, result);
     }
     else if (strcmp(token, "*") == 0)
     {
-        int b = pop(context);
-        int a = pop(context);
-        int result = a * b;
+        b = pop(context);
+        a = pop(context);
+        result = a * b;
         push(context, result);
     }
     else if (strcmp(token, "/") == 0)
     {
-        int b = pop(context);
-        int a = pop(context);
+        b = pop(context);
+        a = pop(context);
         if (b != 0)
         {
-            int result = a / b;
+            result = a / b;
             push(context, result);
         }
         else
@@ -161,6 +191,9 @@ int isInteger(char * token)
 
     is_integer = 1;
     token_ptr = token;
+
+    if (* token_ptr == '-')
+        token_ptr ++;
     
     while (is_integer == 1 && * token_ptr != 0)
     {
@@ -178,9 +211,17 @@ int toInteger(char * token)
 {
     char * token_ptr;
     int result;
+    int sign;
 
     token_ptr = token;
     result = 0;
+
+    sign = 1;
+    if (* token_ptr == '-')
+    {
+        sign = -1;
+        token_ptr ++;
+    }
 
     while (* token_ptr != 0)
     {
@@ -189,6 +230,8 @@ int toInteger(char * token)
 
         token_ptr ++;
     }
+
+    result *= sign;
 
     return result;
 }
