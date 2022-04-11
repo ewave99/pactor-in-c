@@ -4,33 +4,12 @@
 #include <string.h>
 #include <stdlib.h>
 
-struct Stack
-{
-    struct Stack * last;
-    struct Stack * next;
-    int value;
-};
-
-
-struct Context
-{
-    struct Stack * bottom;
-    struct Stack * top;
-    int stack_length;
-};
+#include "builtins.h"
 
 void runRepl();
 void getInput(char * buffer);
-void processInput(char * buffer, struct Context * context);
-void processToken(char * token, struct Context * context);
-
-int isInteger(char * token);
-int toInteger(char * token);
-
-void push(struct Context * context, int value);
-int pop(struct Context * context);
-
-void printStack(struct Context * context);
+void processInput(char * buffer, struct Stack * stack);
+void processToken(char * token, struct Stack * stack);
 
 int main()
 {
@@ -42,18 +21,18 @@ int main()
 void runRepl()
 {
     char buffer[BUFFER_SIZE];
-    struct Context * context;
+    struct Stack * stack;
 
-    context = (struct Context *) malloc(sizeof(struct Context));
+    stack = (struct Stack *) malloc(sizeof(struct Stack));
 
-    context->top = NULL;
-    context->bottom = NULL;
-    context->stack_length = 0;
+    stack->top = NULL;
+    stack->bottom = NULL;
+    stack->length = 0;
 
     while (1)
     {
         getInput(buffer);
-        processInput(buffer, context);
+        processInput(buffer, stack);
     }
 }
 
@@ -63,7 +42,7 @@ void getInput(char * buffer)
     buffer[strcspn(buffer, "\n")] = 0;
 }
 
-void processInput(char * buffer, struct Context * context)
+void processInput(char * buffer, struct Stack * stack)
 {
     char * buffer_ptr;
 
@@ -86,222 +65,58 @@ void processInput(char * buffer, struct Context * context)
 
         * token_buffer_ptr = 0;
         
-        processToken(token_buffer, context);
+        processToken(token_buffer, stack);
 
         buffer_ptr ++;
     }
 }
 
-void processToken(char * token, struct Context * context)
+void processToken(char * token, struct Stack * stack)
 {
-    int int_value;
-    int a;
-    int b;
-    int c;
-    int result;
-
     if (strcmp(token, ".") == 0)
     {
-        if (context->top != NULL)
-        {
-            int_value = pop(context);
-            printf("%d\n", int_value);
-        }
-        else
-        {
-            printf("Stack empty, cannot pop.\n");
-        }
+        printTop(stack);
     }
     else if (strcmp(token, ".s") == 0)
     {
-        printStack(context);
+        printStack(stack);
     }
     else if (strcmp(token, "dup") == 0)
     {
-        a = pop(context);
-        push(context, a);
-        push(context, a);
+        dup(stack);
     }
     else if (strcmp(token, "swap") == 0)
     {
-        b = pop(context);
-        a = pop(context);
-        push(context, b);
-        push(context, a);
+        swap(stack);
     }
     else if (strcmp(token, "drop") == 0)
     {
-        pop(context);
+        pop(stack);
     }
     else if (strcmp(token, "rot") == 0)
     {
-        c = pop(context);
-        b = pop(context);
-        a = pop(context);
-        push(context, b);
-        push(context, c);
-        push(context, a);
+        rot(stack);
     }
     else if (strcmp(token, "+") == 0)
     {
-        b = pop(context);
-        a = pop(context);
-        result = a + b;
-        push(context, result);
+        add(stack);
     }
     else if (strcmp(token, "-") == 0)
     {
-        b = pop(context);
-        a = pop(context);
-        result = a - b;
-        push(context, result);
+        subtract(stack);
     }
     else if (strcmp(token, "*") == 0)
     {
-        b = pop(context);
-        a = pop(context);
-        result = a * b;
-        push(context, result);
+        multiply(stack);
     }
     else if (strcmp(token, "/") == 0)
     {
-        b = pop(context);
-        a = pop(context);
-        if (b != 0)
-        {
-            result = a / b;
-            push(context, result);
-        }
-        else
-        {
-            printf("Cannot divide by zero.\n");
-        }
+        divide(stack);
     }
     else if (isInteger(token))
     {
-        int_value = toInteger(token);
-        push(context, int_value);
+        int int_value = toInteger(token);
+        push(stack, int_value);
     }
 }
 
-int isInteger(char * token)
-{
-    int is_integer;
-    char * token_ptr;
-
-    is_integer = 1;
-    token_ptr = token;
-
-    if (* token_ptr == '-')
-        token_ptr ++;
-    
-    while (is_integer == 1 && * token_ptr != 0)
-    {
-        if (* token_ptr < 48 || * token_ptr >= 58)
-        {
-            is_integer = 0;
-        }
-        token_ptr ++;
-    }
-
-    return is_integer;
-}
-
-int toInteger(char * token)
-{
-    char * token_ptr;
-    int result;
-    int sign;
-
-    token_ptr = token;
-    result = 0;
-
-    sign = 1;
-    if (* token_ptr == '-')
-    {
-        sign = -1;
-        token_ptr ++;
-    }
-
-    while (* token_ptr != 0)
-    {
-        result *= 10;
-        result += (int) (* token_ptr) - 48;
-
-        token_ptr ++;
-    }
-
-    result *= sign;
-
-    return result;
-}
-
-void push(struct Context * context, int value)
-{
-    struct Stack * new_node;
-
-    new_node = (struct Stack *) malloc(sizeof(struct Stack));
-
-    new_node->last = context->top;
-    new_node->next = NULL;
-    new_node->value = value;
-
-    if (context->stack_length > 0)
-        context->top->next = new_node;
-
-    if (context->stack_length == 0)
-        context->bottom = new_node;
-    else if (context->stack_length == 1)
-        context->bottom->next = new_node;
-
-    context->top = new_node;
-
-    context->stack_length ++;
-}
-
-int pop(struct Context * context)
-{
-    if (context->stack_length == 0)
-        return -1;
-
-    struct Stack * old_top;
-    struct Stack * new_top;
-    int value;
-
-    old_top = context->top;
-
-    new_top = old_top->last;
-    value = old_top->value;
-
-    if (context->stack_length > 1)
-        new_top->next = NULL;
-
-    context->top = new_top;
-
-    if (context->stack_length == 1)
-        context->bottom = NULL;
-    else if (context->stack_length == 2)
-        context->bottom->next = NULL;
-
-    free(old_top);
-
-    context->stack_length --;
-
-    return value;
-}
-
-void printStack(struct Context * context)
-{
-    struct Stack * node;
-    int index;
-
-    node = context->bottom;
-    index = 0;
-    while (index < context->stack_length && node != NULL)
-    {
-        printf("%d ", node->value);
-        node = node->next;
-        index ++;
-    }
-    printf("<- TOP\n");
-}
