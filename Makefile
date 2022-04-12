@@ -1,6 +1,8 @@
 SRC = \
 	  main.c \
-	  builtins.c
+	  builtins.c \
+	  repl.c \
+	  compile.c
 
 OBJ = ${SRC:.c=.o}
 
@@ -8,13 +10,13 @@ OBJ = ${SRC:.c=.o}
 
 CFLAGS = -Wall ${INCS}
 
-all: main
+all: pactor
 
-main: ${OBJ}
+pactor: ${OBJ}
 	cc -o $@ ${OBJ} ${LIBS}
 
 .c.o:
 	${CC} -c ${CFLAGS} $<
 
 clean:
-	rm -f main ${OBJ}
+	rm -f pactor ${OBJ}
