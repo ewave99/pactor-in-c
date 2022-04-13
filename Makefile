@@ -1,8 +1,7 @@
 SRC = \
 	  main.c \
-	  builtins.c \
-	  repl.c \
-	  compile.c
+	  compile.c \
+	  stack.c
 
 OBJ = ${SRC:.c=.o}
 
