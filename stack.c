@@ -1,42 +1,5 @@
 #include "stack.h"
-#include <stdio.h>
 #include <stdlib.h>
-
-void printNodeValue(struct NodeValue value)
-{
-    switch(value.type)
-    {
-        case LONG_LONG_INT:
-            printf("%lld", value.raw.long_long_int_value);
-            break;
-        case DOUBLE_FLOAT:
-            printf("%f", value.raw.double_float_value);
-            break;
-        case STRING:
-            printf("%s", value.raw.string_value);
-            break;
-        default:
-            printf("NONE");
-            break;
-    }
-}
-void printStack(struct Stack * stack)
-{
-    struct Node * node;
-    int index;
-
-    node = stack->bottom;
-    index = 0;
-    while (node != NULL)
-    {
-        printNodeValue(node->value);
-        printf(" ");
-        node = node->next;
-        index ++;
-    }
-    printf("<- TOP\n");
-}
-
 
 void push(struct Stack * stack, struct NodeValue value)
 {

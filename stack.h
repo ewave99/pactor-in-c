@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 enum DataType {
     LONG_LONG_INT,
     DOUBLE_FLOAT,
@@ -31,8 +29,6 @@ struct Stack
     int length;
 };
 
-void printNodeValue(struct NodeValue value);
-void printStack(struct Stack * stack);
 void push(struct Stack * stack, struct NodeValue value);
 struct NodeValue pop(struct Stack * stack);
 struct NodeValue peek(struct Stack * stack);
