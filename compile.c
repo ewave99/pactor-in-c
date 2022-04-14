@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <ctype.h>
 
+void processToken(const char * token);
+
 int compileFile(const char * filename)
 {
     FILE * file_ptr;
@@ -28,7 +30,7 @@ int compileFile(const char * filename)
 
         * buffer_ptr = 0;
 
-        printf("%s\n", buffer);
+        processToken(buffer);
 
         buffer_ptr = buffer;
 
@@ -39,4 +41,9 @@ int compileFile(const char * filename)
     fclose(file_ptr);
 
     return 0;
+}
+
+void processToken(const char * token)
+{
+    printf("%s\n", token);
 }

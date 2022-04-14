@@ -92,30 +92,68 @@ void add(struct Stack * stack)
     a = pop(stack);
     if (a.type == NONE) return;
 
-    if (a.type != b.type)
-    {
-        printf("Conflicting types for: add.");
-        return;
-    }
-
-    result.type = a.type;
-
+    result.type = DOUBLE_FLOAT;
     switch (a.type)
     {
         case LONG_LONG_INT:
-            result.raw.long_long_int_value = a.raw.long_long_int_value + b.raw.long_long_int_value;
+            result.raw.double_float_value = (double) a.raw.long_long_int_value;
             break;
         case DOUBLE_FLOAT:
-            result.raw.double_float_value = a.raw.double_float_value + b.raw.double_float_value;
-            break;
-        case STRING:
+            result.raw.double_float_value = a.raw.double_float_value;
             break;
         default:
-            break;
+            printf("Cannot perform addition on non-numeric value.");
+            return;
     }
-
+    switch (b.type)
+    {
+        case LONG_LONG_INT:
+            result.raw.double_float_value += (double) b.raw.long_long_int_value;
+            break;
+        case DOUBLE_FLOAT:
+            result.raw.double_float_value += b.raw.double_float_value;
+            break;
+        default:
+            printf("Cannot perform addition on non-numeric value.");
+            return;
+    }
     push(stack, result);
 }
-void subtract(struct Stack * stack);
-void multiply(struct Stack * stack);
-void divide(struct Stack * stack);
+void subtract(struct Stack * stack)
+{
+    struct NodeValue a,
+                     b,
+                     result;
+
+    b = pop(stack);
+    if (b.type == NONE) return;
+    a = pop(stack);
+    if (a.type == NONE) return;
+
+    result.type = DOUBLE_FLOAT;
+    switch (a.type)
+    {
+        case LONG_LONG_INT:
+            result.raw.double_float_value = (double) a.raw.long_long_int_value;
+            break;
+        case DOUBLE_FLOAT:
+            result.raw.double_float_value = a.raw.double_float_value;
+            break;
+        default:
+            printf("Cannot perform subtraction on non-numeric value.");
+            return;
+    }
+    switch (b.type)
+    {
+        case LONG_LONG_INT:
+            result.raw.double_float_value -= (double) b.raw.long_long_int_value;
+            break;
+        case DOUBLE_FLOAT:
+            result.raw.double_float_value -= b.raw.double_float_value;
+            break;
+        default:
+            printf("Cannot perform subtraction on non-numeric value.");
+            return;
+    }
+    push(stack, result);
+}
