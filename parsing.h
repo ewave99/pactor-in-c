@@ -1,2 +1,2 @@
-int isInteger(char * token);
-int toInteger(char * token);
+#include <stdio.h>
+int parseFile(FILE * file_ptr);
